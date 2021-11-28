@@ -10,7 +10,7 @@
 
 > - 초안은 한국어로 간단하게 작성되었으며, 실행 코드 등은 시간이 지나 추가될 수 있습니다. 혹여 이해가 안되는 부분이 있다면 제 메일로 연락하여 주시기 바랍니다. 보충 설명이 담긴 답장과 함께 본문을 업데이트하도록 하겠습니다.
 > - 영어 버전은 준비 중에 있지 않으며, 이에 대해 도움을 주실 분께서는 메일로 연락해주시기 바랍니다.
-> - 아쉽게도 GitHub는 수식이나 일부 Markdown 문법에 대한 스타일링을 제공하지 않으므로, .md 문서를 Typora에서 HTML파일로 추출하여 제공하고 있습니다. 아래 링크를 통해 문서를 열람하십시오.
+> - 아쉽게도 GitHub는 수식이나 일부 Markdown 문법에 대한 스타일링을 제공하지 않으므로, .md 문서를 Typora에서 HTML파일로 추출하여 제공하고 있습니다. 아래 하이퍼 링크를 통해 문서를 열람하십시오.
 
 
 
@@ -20,11 +20,7 @@ E-mail: ysn3830@gmail.com
 
 ## Contents
 
-1. 재귀 반사 패시브 마커 기반 모션캡쳐(Retro Reflective Passive Marker based MotionCapture)
-2. 캘리브레이션(Calibration)
+1. [재귀 반사 패시브 마커 기반 모션캡쳐(Retro Reflective Passive Marker based MotionCapture)](https://htmlpreview.github.io/?https://github.com/yongsyongs/how-to-motion-capture/blob/main/html/retro-reflective-passive-marker-based-motion-capture.html)
+2. [캘리브레이션(Calibration)](https://htmlpreview.github.io/?https://github.com/yongsyongs/how-to-motion-capture/blob/main/html/calibration.html)
 3. 리컨스트럭션(Reconstruction)
-
-
-
-깃허브가 수식을 지원하지 않는 이슈로, 이 [링크](https://htmlpreview.github.io/?https://github.com/yongsyongs/how-to-motion-capture/blob/main/How-to-mocap-KR.html)에서 읽는 것이 좋습니다.
 
