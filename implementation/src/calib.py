@@ -1,10 +1,9 @@
+import random
 import numpy as np
-import cv2
-import os
-import matplotlib.pyplot as plt
 from scipy.optimize import least_squares
+from tqdm import tqdm
 
-def reprojection_error(K, R, T):
+def get_reprojection_error(m, M, K, R, T):
     X = np.einsum('nij, njk -> nik', R, M) + T
     X /= X[:, -1:]
     X = np.einsum('ij, njk -> nik', K, X)
@@ -13,7 +12,7 @@ def reprojection_error(K, R, T):
     rmse = np.sqrt(mse)
     return rmse
 
-def estimate_homography(m, M, *args, **kwargs):
+def find_homography(m, M, *args, **kwargs):
     assert len(m.shape) == len(M.shape) == 2
     assert m.shape[1] == M.shape[1]
     assert m.shape[0] == 2 and M.shape[0] == 3
@@ -41,28 +40,9 @@ def estimate_homography(m, M, *args, **kwargs):
         return _r
 
     res = least_squares(fun, x0, method='lm', *args, **kwargs)
-    return res.x.reshape(3, 3), res.fun
+    return res.x.reshape(3, 3)
 
-
-def extract_RT(K, H):
-    RT = np.linalg.inv(K) @ H
-    r1 = RT[:, 0]
-    r2 = RT[:, 1]
-    t = RT[:, 2]
-
-    s1 = np.linalg.norm(r1)
-    s2 = np.linalg.norm(r2)
-    r1 /= s1
-    r2 /= s2
-    # assert np.dot(r1, r2) < 1e-6, np.dot(r1, r2)
-    r3 = np.cross(r1, r2)
-    t /= (s1 + s2) / 2
-    R = np.stack([r1, r2, r3]).T
-    T = t[..., np.newaxis]
-
-    return R, T
-
-def get_initial_K(Hs):
+def find_intrinsic_parameters(Hs):
     N_image = Hs.shape[0]
     
     h = lambda k, i, j: Hs[k, j - 1, i - 1]
@@ -99,87 +79,60 @@ def get_initial_K(Hs):
 
     return K
 
-def trace(A):
-    return np.sum(np.diag(A))
+def extract_extrinsic_parameters(K, H):
+    RT = np.linalg.inv(K) @ H
+    r1 = RT[:, 0]
+    r2 = RT[:, 1]
+    t = RT[:, 2]
 
-def skew_symmetry_matrix(v): # skew-symmetric matrix
-    assert v.shape == (3, 1) or v.shape == (3,)
-    if v.shape == (3, 1):
-        v = v.reshape(-1)
-    return np.array([
-        [0, -v[2], v[1]],
-        [v[2], 0, -v[0]],
-        [-v[1], v[0], 0],
-    ])
+    s1 = np.linalg.norm(r1)
+    s2 = np.linalg.norm(r2)
+    r1 /= s1
+    r2 /= s2
+    assert np.dot(r1, r2) < 1e-6, np.dot(r1, r2)
+    r3 = np.cross(r1, r2)
+    t /= (s1 + s2) / 2
+    R = np.stack([r1, r2, r3]).T
+    T = t[..., np.newaxis]
 
-def exp_map(w):
-    assert w.shape == (3, 1)
-    theta = np.linalg.norm(w)
-    I = np.eye(3)
-    if theta == 0:
-        return I
-    sk_w = skew_symmetry_matrix(w)
-    exp = np.cos(theta) * I + (np.sin(theta) / theta) * sk_w + ((1 - np.cos(theta)) / theta ** 2) * w @ w.T
-    assert exp.shape == (3, 3)
-    return exp
+    return R, T
 
-def log_map(R):
-    assert R.shape == (3, 3)
-    theta = np.arccos((trace(R) - 1) / 2)
-    if np.isclose(theta, 0):
-        return np.zeros((3, 1), dtype=np.float32)
-    w = (theta / (2 * np.sin(theta))) * np.array([
-        [R[2, 1] - R[1, 2]],
-        [R[0, 2] - R[2, 0]],
-        [R[1, 0] - R[0, 1]]
-    ], dtype=np.float32)
-    return w
 
-def optimize_K(m, M, Hs, K_init, *args, **kwargs):
-    N_image = Hs.shape[0]
-    N_point = m.shape[2]
-    assert m.shape[0] == M.shape[0] == N_image
-    assert m.shape[1] == 2 and M.shape[1] == 3
-    assert m.shape[2] == M.shape[2] == N_point
+def optimize_intrinsic_parameters(m, M):
+    n_iter = 100
+    n_samples = 10
 
-    x0 = K_init.ravel()[[0, 2, 4, 5]]
-    extrs = [extract_RT(K_init, Hs[i]) for i in range(N_image)]
-    ws = np.concatenate([log_map(x[0]) for x in extrs])[..., 0]
-    Ts = np.concatenate([x[1] for x in extrs])[..., 0]
-    x0 = np.concatenate([x0, ws, Ts])
-
-    def fun(x):
-        K = np.array([
-            [x[0], 0, x[1]],
-            [0, x[2], x[3]],
-            [0, 0, 1]
-        ])
-        ws = x[4:4 + 3 * N_image].reshape(N_image, 3, 1)
-        Ts = x[-3 * N_image:].reshape(N_image, 3, 1)
-        Rs = np.stack([exp_map(w) for w in ws])
-
-        X = np.einsum('nij, njk -> nik', Rs, M) + Ts
-        X = X / X[:, -1:]
+    Hs = np.stack([find_homography(m[i], M) for i in tqdm(range(m.shape[0]))])
+    def fun(K, R, T):
+        X = np.einsum('nij, jk -> nik', R, M) + T
+        X /= X[:, -1:]
         X = np.einsum('ij, njk -> nik', K, X)
-        return (m - X[:, :-1]).ravel()
+        e = X[:, :-1] - m
+        e = np.linalg.norm(e, axis=1) ** 2
+        mse = e.mean(axis=1)
+        rmse = np.sqrt(mse)
+        return rmse
 
-    res = least_squares(fun, x0, method='lm', *args, **kwargs)
-    x = res.x
+    def get_inlier_count(rmse):
+        return (rmse < 3).sum()
 
-    K = np.array([
-        [x[0], 0, x[1]],
-        [0, x[2], x[3]],
-        [0, 0, 1]
-    ])
-    ws = x[4:4 + 3 * N_image].reshape(N_image, 3, 1)
-    Ts = x[-3 * N_image:].reshape(N_image, 3, 1)
-    Rs = np.stack([exp_map(w) for w in ws])
 
-    return K, Rs, Ts
+    max_inlier_count = 0
+    best_K = None
+    for i in tqdm(range(n_iter)):
+        args = np.random.choice(np.arange(Hs.shape[0]), n_samples)
+        sample_Hs = Hs[args]
+        K = find_intrinsic_parameters(sample_Hs)
+        RTs = np.stack([np.concatenate(extract_extrinsic_parameters(K, H), axis=1) for H in sample_Hs])
+        rmse = fun(K, RTs[..., :3], RTs[..., 3:])
+        inlier_count = get_inlier_count(rmse)
+        if inlier_count > max_inlier_count:
+            max_inlier_count = inlier_count
+            best_K = K
 
-def intrinsic_calibration(m, M):
-    # (N_images, Dim, N_points)
-    Hs = np.stack([estimate_homography(m[i], M[i])[0] for i in range(m.shape[0])])
-    K_init = get_initial_K(Hs)
-    K, Rs, Ts = optimize_K(m, M, Hs, K_init)
-    return K, Rs, Ts
+    return best_K
+            
+if __name__ == '__main__':
+    m = np.ones((128, 2, 10))
+    M = np.ones((3, 10))
+    optimize_intrinsic_parameters(m, M)
