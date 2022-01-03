@@ -24,13 +24,29 @@ class InvalidArgumentError(ValueError):
     pass
 
 
+# POSITIONS = np.array(
+#     [
+#         [0, 0],
+#         [0, 1],
+#         [0, 3],
+#     ]
+# )  # (N, 2)
+
 POSITIONS = np.array(
     [
         [0, 0],
+        [1, 0],
+        [2, 0],
         [0, 1],
-        [0, 3],
+        [1, 1],
+        [2, 1],
+        [0, 2],
+        [1, 2],
+        [2, 2],
+        [4, 2.5],
     ]
-)  # (N, 2)
+)
+
 if len(POSITIONS.shape) == 2:
     np.random.seed(42)
     t = np.random.uniform(1e-1, np.pi / 2 - 1e-1)
@@ -64,7 +80,7 @@ def video_apply(video_path, func, description=None):
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     results = [None] * length
 
-    for i in (progress := tqdm.tqdm(range(length))):
+    for i in (progress := tqdm(range(length))):
         ret, image = cap.read()
         if not ret or image is None:
             break
@@ -182,6 +198,8 @@ def identify_custom(points: np.ndarray) -> np.ndarray:
         식별되어 정렬된 마커 좌표
     """
 
+    # region identifying for wand
+    """
     if len(points.shape) != 2 or points.shape != (3, 2):
         return None
 
@@ -202,6 +220,62 @@ def identify_custom(points: np.ndarray) -> np.ndarray:
     is_valid = all(validities)
 
     return points if is_valid else None
+    """
+    # endregion
+
+    # region identifying for board
+    if len(points.shape) != 2 or points.shape != (10, 2):
+        return None
+
+    order = [-1 for _ in range(points.shape[0])]
+    far_index = np.argmax(points[..., 0])
+    order[9] = far_index
+    remain_index = [i for i in range(points.shape[0]) if i not in order]
+    bias = points[remain_index, 1] - points[remain_index, 0]
+    order[8] = remain_index[np.argmin(bias)]
+    remain_index = [i for i in range(points.shape[0]) if i not in order]
+    bias = points[remain_index, 1] - points[remain_index, 0]
+    order[0] = remain_index[np.argmax(bias)]
+    remain_index = [i for i in range(points.shape[0]) if i not in order]
+    box_center = (points[order[0]] + points[order[8]]) / 2
+    d_from_center = points[remain_index] - box_center[np.newaxis, ...]
+    d_from_center = np.linalg.norm(d_from_center, axis=-1)
+    assert d_from_center.shape == (7,), d_from_center.shape
+    order[4] = remain_index[np.argmin(d_from_center)]
+    remain_index = [i for i in range(points.shape[0]) if i not in order]
+    bias = points[remain_index, 1] + points[remain_index, 0]
+    order[6] = remain_index[np.argmin(bias)]
+    order[2] = remain_index[np.argmax(bias)]
+    # now remain 1 3 5 7
+    remain_index = [i for i in range(points.shape[0]) if i not in order]
+    order[1] = remain_index[np.argmax(points[remain_index, 1])]
+    order[7] = remain_index[np.argmin(points[remain_index, 1])]
+    order[3] = remain_index[np.argmin(points[remain_index, 0])]
+    order[5] = remain_index[np.argmax(points[remain_index, 0])]
+
+    # validation
+    y = points[order] / 640
+    val = list()
+
+    val.append(np.linalg.norm((y[0] + y[8]) / 2 - y[4]) < 5.0e-3)
+    val.append(np.linalg.norm((y[0] + y[6]) / 2 - y[3]) < 5.0e-3)
+    val.append(np.linalg.norm((y[0] + y[2]) / 2 - y[1]) < 5.0e-3)
+    val.append(np.linalg.norm((y[1] + y[7]) / 2 - y[4]) < 5.0e-3)
+    val.append(np.linalg.norm((y[2] + y[6]) / 2 - y[4]) < 5.0e-3)
+    val.append(np.linalg.norm((y[2] + y[8]) / 2 - y[5]) < 5.0e-3)
+    val.append(np.linalg.norm((y[3] + y[5]) / 2 - y[4]) < 5.0e-3)
+    val.append(np.linalg.norm((y[6] + y[8]) / 2 - y[7]) < 5.0e-3)
+    d = np.stack(
+        [np.linalg.norm(y - y[i][np.newaxis, ...], axis=-1) for i in range(y.shape[0])]
+    )
+    assert d.shape == (10, 10), d.shape
+    val.append(np.logical_not((np.sum(np.isclose(d, 0), axis=-1) > 1).any()))
+    val = np.array(val)
+
+    return points[order] if val.all() else None
+
+    return points if is_valid else None
+    # endregion
 
 
 def identify_position(points: np.ndarray) -> np.ndarray:
@@ -232,14 +306,14 @@ def identify_position(points: np.ndarray) -> np.ndarray:
     # 모든 점들에 대해 점과 점 사이 벡터를 계산한다.
     V = X[:, np.newaxis, ...] - X[..., np.newaxis, :]  # (N!, N, N, 2)
 
-    # 종복이나 0값이 포함되어 있으므로 상삼각행렬을 flatten한 것만 남긴다.
+    # 중복이나 0값이 포함되어 있으므로 상삼각행렬을 flatten한 것만 남긴다.
     V = V[:, triu_indices[0], triu_indices[1]]  # (N!, L, 2)
 
     # 실제 마커를 어떤 평면에 투영할 경우 점들 사이 벡터의 비율이 일정하다.(차원별로 일정하다. 거리는 일정하지 않다.)
     R = np.linalg.norm(V / VECS[np.newaxis, ...], axis=-1)  # (N!, L)
     m = R.mean(axis=1)[..., np.newaxis]  # (N!, 1)
     error = (R - m) / m  # (N!, L)
-    is_valid = (error < 3e-2).all(axis=1)  # (N!,)
+    is_valid = (error < 5e-2).all(axis=1)  # (N!,)
 
     if is_valid.sum() == 1:
         index = perms[is_valid]  # (1, N)
