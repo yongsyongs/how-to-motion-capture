@@ -24,3 +24,4 @@ E-mail: ysn3830@gmail.com
 2. [캘리브레이션(Calibration)](https://htmlpreview.github.io/?https://github.com/yongsyongs/how-to-motion-capture/blob/main/html/calibration.html)
 3. 리컨스트럭션(Reconstruction)
 
+* 현재 작성자의 군 복무 이슈로 작성이 일시 중단되었습니다.
