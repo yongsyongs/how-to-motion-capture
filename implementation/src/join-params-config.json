@@ -1,0 +1,19 @@
+{
+    "CameraCount": 3,
+    "IntrinsicParameters": [
+        "../data/params/intr/01.npy",
+        "../data/params/intr/02.npy",
+        "../data/params/intr/03.npy"
+    ],
+    "ExtrinsicParameters": {
+        "Offset": {
+            "R": "I",
+            "T": "0"
+        },
+        "Relatives": [
+            "../data/params/extr/01_02.npy",
+            "../data/params/extr/02_03.npy"
+        ]
+    },
+    "OutputPath": "../data/params/params.npy"
+}

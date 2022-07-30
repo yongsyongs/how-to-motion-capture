@@ -1,0 +1,12 @@
+{
+    "CameraCount": 3,
+    "CameraParameters": "../data/params/params.npy",
+    "ActionMarkerPath": [
+        "../data/marker/act/01.npy",
+        "../data/marker/act/02.npy",
+        "../data/marker/act/03.npy"
+    ],
+    "SynchronizedMarkerPath": "../data/marker/marker.npy",
+    "SpatialThreshold": 3,
+    "OutputPath": "../data/point_cloud.npy"
+}

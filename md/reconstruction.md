@@ -6,11 +6,11 @@
 
 먼저 2차원 점으로부터 3차원 점을 복원하는 방법에 대해 이해할 필요가 있습니다. 잘 알려져 있는 방법 중 하나는 **선형 삼각측량법**입니다.
 
-캘리브레이션 과정을 통해 어떤 카메라의 $K, R, T$를 모두 구했다고 합시다. Projection Matrix $P=K[R|T]$와 2차원 픽셀 좌표 점 $\mathbf m$, 3차원 실제 좌표 점 $\mathbf M$ 사이에는 $\mathbf m=P\mathbf M$이라는 간단한 관계성이 생깁니다. 그러나 불행하게도 $P^{-1}\mathbf m=\mathbf M$이라는 식으로 바로 $\mathbf M$을 구하지 못합니다. 사영 과정에서 동차 좌표계가 사용되기 때문입니다. 따라서 동차 좌표계 상에서의 점만을 구할 수 있고, 이는 실제 좌표계에서는 카메라의 중심과 $\mathbf M$을 잇는 직선이 됩니다.
+캘리브레이션 과정을 통해 어떤 카메라의 $K, R, T$를 모두 구했다고 합시다. Projection Matrix $P=K[R|T]$와 2차원 픽셀 좌표 점 $\mathbf m$, 3차원 실제 좌표 점 $\mathbf M$ 사이에는 $\mathbf m=P\mathbf M$이라는 간단한 관계성이 생깁니다. 그러나 $P^{-1}\mathbf m=\mathbf M$라는 식으로 쉽게 복원하는 것 어렵습니다. 위 수식에서의 $\mathbf m$과 우리가 구한 좌표는 다르기 때문이죠(동차좌표계에서 바라보아야 같은 점입니다). 따라서 동차 좌표계 상에서의 점만을 구할 수 있고, 이는 실제 좌표계에서는 카메라의 중심과 $\mathbf M$을 잇는 직선이 됩니다.
 
-따라서 복수의 카메라와 그 파라미터들이 필요합니다. 간단하게 생각해서, 두 카메라의 중심 $C_1, C_2$이 있을 때 이 두 점과 $\mathbf M$을 잇는 두 직선이 있다고 할 때, $\mathbf M$은 두 직선의 교점입니다. 
+따라서 복수의 카메라가 필요합니다. 두 카메라의 중심 $C_1, C_2$이 있을 때 이 두 점과 $\mathbf M$을 잇는 두 직선을 구할 수 있습니다. 그렇다면 $\mathbf M$을 모른 상태에서 두 직선을 구할 수 있다면 그 교점을 $\mathbf M$이라고 할 수 있겠죠. 이렇게 복수의 카메라를 통해 간접적으로 $\mathbf M$에 대한 정보를 구하는 접근이 필요합니다.
 
-위와 같이 직선의 교점으로 구할 수 있다면 참 편하겠으나, 캘리브레이션은 최적화 과정이므로 완벽하게 $C_i$와 $\mathbf M$를 잇는 직선을 구할 수는 없습니다. 따라서 여러가지 카메라의 Projection Matrix $P_i$가 주어졌을 때 가장 적절한 $\mathbf M$을 구하는 과정이 필요합니다. 본문에서는 그 도구로 Linear Triangulation을 사용합니다.
+위와 같이 직선의 교점으로 구할 수 있다면 참 편하겠으나, 여러가지 이유로 완벽하게 $C_i$와 $\mathbf M$를 잇는 직선을 구할 수는 없습니다. 따라서 여러가지 카메라의 Projection Matrix $P_i$가 주어졌을 때 가장 적절한 $\mathbf M$을 구하는 과정이 필요합니다. 본문에서는 그 도구로 Linear Triangulation을 사용합니다.
 
 $N$개의 카메라에 대한 Projection Matrix $P_i=\begin{bmatrix}p_1&p_2&p_3&p_4\end{bmatrix}$와 점 $M$에 대한 개별 카메라의 관측 (픽셀) 좌표 $\mathbf m_i=(u_i, v_i)$가 있습니다. $p_i$는 길이가 3인 열벡터입니다. 이로부터 다음과 같은 행렬을 구현합니다.
 $$
@@ -55,7 +55,7 @@ def linear_triangulation(points, Pmats):
     return X # (n_points, 3)
 ```
 
-
+위 `linear_triangulation`함수를 통해 n개의 카메라에서 동시에 관측된 2차원 좌표들로 3차원 좌표를 복원할 수 있습니다. Projection Matrix가 완벽하게 계산되지 않았더라도 오차들이 선형 보간의 형태로 보정됩니다.   
 
 ### Marker Labeling
 
@@ -71,11 +71,11 @@ $j$ 번째 카메라에서 인식된 2D marker들 $\{\mathbf m_{jk}\}(k=1,...,p_
 
 쉽게 떠올릴 수 있는 방법 중 하나는 두 카메라의 Epipolar Geometry를 활용하는 방법입니다. 카메라 1, 2에는 각각 $p_1, p_2$개의 마커가 촬영됩니다. 따라서 카메라 2에는 $p_1$개의 epipolar plane을 그릴 수 있으며, 반대의 경우에도 같습니다. 캘리브레이션이 잘 되었다는 가정 하에 각각의 epiploar plane에는 정확히 걸치는 점이 하나 이상 존재하게 됩니다. 따라서 2번 카메라에 그려진 $p_1$개의 epiploar plane과 $p_2$개의 점들로부터 **점과 직선 사이의 거리**를 구해 그 거리가 가장 짧은 점들끼리 순서대로 매칭합니다. 이 때 적절한 상한값을 설정할 필요가 있습니다.
 
-슬프게도 상기한 방법이 실제 상황에서 좋능을 내지 못합니다. 하나의 epiploar plane에 여러 개의 점들이 매칭될 수 있기 때문입니다. 3차원 정보를 2차원에서 다루는 것이기에 당연하게도 정보의 손실이 발생하며, 그 과정에서 완벽한 복원이 어려운 것입니다. 작성자의 경험상 준수한 캘리브레이션 오차를 달성했음에도 불구하고 이 방법으로 정교한 point matching를 달성하기는 어려웠습니다.
+실제론 위 방법이 그리 쓸모 있지는 않습니다. 하나의 epiploar plane에 여러 개의 점들이 매칭될 수 있기 때문입니다. 3차원 정보를 2차원에서 다루는 것이기에 정보의 손실이 발생하며, 그 과정에서 완벽한 복원이 어려운 것입니다. 작성자의 경험상 준수한 캘리브레이션 오차를 달성했음에도 불구하고 이런 접근으로 좋은 결과를 내기는 힘들었습니다.
 
-[1]에서는 삼각측량법(Linear Triangulation)을 반복적으로 적용하여 최소 오차를 만들어내는 point set을 구합니다. $n$개의 이웃한 카메라에서 임의의 2D points들을 뽑아 Linear Triangulation으로 3D reconstruction을 적용합니다. 같은 마커가 아닐지라도 계산으로부터 어떤 3차원상의 점이 도출되는데, 만약 다른 마커일 경우 이들 좌표에 평균을 적용한 점이 계산됩니다. 따라서 모든 경우의 수에 대해 reconstrunction을 진행해 point cloud를 만든 뒤, 이들을 다시 reproject합니다. 이 때 reprojection error가 낮은 set들이 적절하게 같은 마커로 매칭된 그룹입니다.
+[1]에서는 삼각측량법(Linear Triangulation)을 반복적으로 적용하여 최소 오차를 만들어내는 point set을 구합니다. $n$개의 이웃한 카메라에서 임의의 2D points들을 뽑아 Linear Triangulation으로 3D reconstruction을 적용합니다. 같은 마커가 아닐지라도 선형 보간에 의해 어떻게든 3차원상의 점이 도출됩니다. 이렇게 모든 경우의 수에 대해 reconstrunction을 진행해 point cloud를 만든 뒤, 이들을 카메라로 reproject합니다. 이 때 reprojection error가 낮은 set들이 적절하게 같은 마커로 매칭된 그룹입니다.
 
-좀 더 자세한 예시로, [1]에서는 $n=3$인 경우를 다루었습니다. 서로 이웃한 3개의 카메라 1, 2, 3들로부터 임의의 픽셀 좌표 점 $(\mathbf m_m, \mathbf m_n, \mathbf m_o)$가 있습니다. 그리고 세 카메라에 대응되는 Projection Matrix $P_1, P_2, P_3$가 있습니다. 해당 점들과 이 Projection Matrix로부터 Linear Triangulation을 실행하면 3차원 공간의 점 $M$이 도출됩니다. 따라서 $p_1\times p_2\times p_3$만큼의 triplet을 구성할 수 있는 경우의 수가 생기고, 해당 triplet들 중 reconstruct를 진행했을 때 reprojection error가 가장 적은 triplet을 고르면 해당 2차원 점들들은 모두 동일한 마커라고 말할 수 있다는 겁니다.
+좀 더 자세한 예시로, [1]에서는 $n=3$인 경우를 다루었습니다. 서로 이웃한 3개의 카메라 1, 2, 3들로부터 임의의 픽셀 좌표 점 $(\mathbf m_a, \mathbf m_b, \mathbf m_c)$가 있습니다. 그리고 세 카메라에 대응되는 Projection Matrix $P_1, P_2, P_3$가 있습니다. 해당 점들과 이 Projection Matrix로부터 Linear Triangulation을 실행하면 3차원 공간의 점 $M$이 도출됩니다. 따라서 $p_1\times p_2\times p_3$만큼의 triplet을 구성할 수 있는 경우의 수가 생기고, 해당 triplet들 중 reconstruct를 진행했을 때 reprojection error가 가장 적은 triplet을 고르면 해당 2차원 점들들은 모두 동일한 마커라고 말할 수 있다는 겁니다.
 
 이 과정의 결과는 **3D Point Cloud입니다.**
 
