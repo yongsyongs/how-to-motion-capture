@@ -19,7 +19,6 @@ OpenCV라는 훌륭한 라이브러리가 있기 때문에 최적화에 대한 �
 필자는 [다크프로그래머 블로그](https://darkpgmr.tistory.com/32)에서 관련 내용을 처음으로 공부했습니다. 해당 블로그가 잘 설명되어 있어 입문하기에 좋았습니다.
 
 
-
 ### Intrinsic Parameters
 
 Intrinsic Calibration은 내부 파라미터(Intrinsic Parameter)를 구합니다. 카메라의 내부 파라미터는 렌즈에 의해 맺히는 상과 실제 이미지 사이의 관계를 나타냅니다.
