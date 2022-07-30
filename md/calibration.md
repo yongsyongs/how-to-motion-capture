@@ -25,17 +25,15 @@ OpenCV라는 훌륭한 라이브러리가 있기 때문에 최적화에 대한 �
 Intrinsic Calibration은 내부 파라미터(Intrinsic Parameter)를 구합니다. 카메라의 내부 파라미터는 렌즈에 의해 맺히는 상과 실제 이미지 사이의 관계를 나타냅니다.
 
 핀홀 카메라 모델에서 Intrinsic Calibration은 다음과 같은 Intrinsic Parameter Matrix $K$를 구합니다. 
-$$
-K=\begin{bmatrix}f_x & 0 & c_x\\0 & f_y & c_y\\0 & 0 & 1\end{bmatrix}
-$$
+$K=\begin{bmatrix}f_x & 0 & c_x\\0 & f_y & c_y\\0 & 0 & 1\end{bmatrix}$
 (왜곡 계수에 대해서는 다루지 않습니다.)
 
 카메라가 원점이며, 렌즈가 향하는 방향과 카메라 오른쪽 방향이 각각 $z,x$축인 오른손 (직교) 좌표계를 **카메라 좌표계**라고 합니다. 이 카메라 좌표계 상의 어떤 점 $X=(x,y,z)$는 **동차 좌표계** 변환으로 인해 $P=({x\over z},{y\over z},{z\over z})=(a,b,1)$가 됩니다. 이는 카메라로부터 거리가 1만큼인 거리에 형성된 **상**입니다. 
 
 $K$는 이 상에 간단한 일차 변환을 적용하여 **이미지 픽셀 좌표상의 점**으로 변환합니다.
-$$
-KP=\begin{bmatrix}f_x & 0 & c_x\\0 & f_y & c_y\\0 & 0 & 1\end{bmatrix}\begin{bmatrix}a\\b\\1\end{bmatrix}=\begin{bmatrix}f_xa+c_x & f_yb+c_y & 1\end{bmatrix}
-$$
+
+$KP=\begin{bmatrix}f_x & 0 & c_x\\0 & f_y & c_y\\0 & 0 & 1\end{bmatrix}\begin{bmatrix}a\\b\\1\end{bmatrix}=\begin{bmatrix}f_xa+c_x & f_yb+c_y & 1\end{bmatrix}$
+
 이미 동차 좌표계로 변환된 시점에서 $z$축 데이터는 큰 의미가 없습니다. 따라서 $K$에 의한 변환은 카메라로부터 거리 1만큼 떨어진 곳에 형성된 상 $(a,b)$을 이미지 픽셀 좌표 $(u,v)=(f_xa+c_x, f_yb+c_y)$로 바꿔주는 변환이라고 할 수 있습니다. 이 $(u,v)$는 실제 이미지상의 픽셀입니다.
 
 $f$를 초점 길이(focal length)라고 하는데, 일반적으로 이해되는 범용적인 의미의 초점길이가 아니고, 카메라 렌즈의 중심으로부터 수광센서까지의 거리를 말합니다. 이는 카메라 좌표계상에서 이미지 좌표계로의 **scale factor** 정도로 이해하면 편합니다. 카메라 좌표계의 공간 단위를 이미지 픽셀 공간 단위로 변환시켜주는 것입니다. 일반적으로 이미지 해상도와 비슷한 영역대의 단위를 가집니다. (이미지가 $1000\times1000$ 해상도라면 $f$는 $600$ 또는 $1500$과 같은 값을 가질 수 있습니다.)
@@ -53,21 +51,21 @@ $K$에 속하는 모든 미지수는 "렌즈"와 "수광 센서"에 종속적이
 서로 다른 직교 좌표계가 있을 경우 둘 사이의 관계를 나타내는 것은 단 두 가지입니다. 기저의 방향 차이와 원점의 위치 차이입니다. 이는 간단하게 회전 행렬 $R$과 위치 벡터 $T$로 표현할 수 있습니다.
 
 실제 좌표계 상에 위치한 점 $M=(X,Y,Z)^T$가 있을 때, 다음과 같은 변환을 통해 카메라 상의 좌표계로 표현할 수 있습니다.
-$$
-M^C=RM+T
-$$
+
+$M^C=RM+T$
+
 주의할 것은, 좌표계가 바뀌기 때문에 이에 맞춰 **표현이 변하는 것이지 점은 그대로라는 것입니다.**
 
 
 
 이렇게 카메라 좌표계로 점을 표현하면 상을 구하고 바로 이미지로 투영할 수 있습니다. 픽셀상의 좌표를 $m$이라고 하면
-$$
-\lambda m=KM^C=K(RM+T)
-$$
+
+$\lambda m=KM^C=K(RM+T)$
+
 좀 더 구체적으로 살펴보겠습니다. $m$과 $M$의 끝에 1씩을 붙여 $m=(u,v,1)^T, M=(X,Y,Z,1)^T$로 열벡터를 재정의하겠습니다. 그러면 다음과 같이 표현할 수 있습니다.
-$$
-\lambda m=K[R|T]M
-$$
+
+$\lambda m=K[R|T]M$
+
 $[R|T]$는 3 by 3 행렬과 3 by 1 열벡터를 가로로 이어 붙인(concatenate) 것입니다. 행렬의 shape을 계산하다보면 $\lambda m$의 크기의 3 by 1임을 알 수 있습니다. 즉 $\lambda m=(\lambda u, \lambda v, \lambda)^T$의 좌표를 가지는 동차 좌표계 상의 점입니다. 따라서 $\lambda$로 나누어주면 이미지상의 픽셀 좌표 $m$이 도출됩니다.
 
 
@@ -83,8 +81,7 @@ skew 관련 계수가 없을 경우 $K$의 자유도는 4이며, $R$는 회전 �
 
 
 먼저 Real World 상에 존재하는 평면의 3차원 점들을 $\mathbf M$, 이를 촬영하여 이미지로 투영된 2차원 픽셀 좌표를 $\mathbf m$이라 합시다. $N$개의 점이 있을 때 이들은 각각 $3\times N, 2\times N$의 크기를 같습니다.
-$$
-\mathbf M=\begin{pmatrix}
+$\mathbf M=\begin{pmatrix}
 x_1&x_2&...&x_N\\
 y_1&y_2&...&y_N\\
 1&1&...&1\\
@@ -95,27 +92,26 @@ y_1&y_2&...&y_N\\
 u_1&u_2&...&u_N\\
 v_1&v_2&...&v_N\\
 \end{pmatrix}
-$$
+$
+
 $\mathbf M$의 세 번째 행이 모두 1인 이유는 Co-Planar한 점들이라 가정했기 때문입니다. 따라서 해당 평면이 $xy$평면과 나란하다고 가정하면 1 이외의 어떤 상수로 설정해도 상관 없습니다. $z$값이 모두 같다는 게 중요합니다. 실제로 그러한 점들을 촬영해야만 합니다.
 
 ##### Calculate Homography Matrix
 
 위 점들로부터 다음과 같은 행렬 $L$을 구성합니다. $L$의 크기는 $2N\times9$입니다.
-$$
-L=\begin{pmatrix}
+$L=\begin{pmatrix}
 x_1&y_1&1&0&0&0&-u_1x_1&-u_1y_1&-u_1z_1\\
 0&0&0&x_1&y_1&1&-v_1x_1&-v_1y_1&-v_1z_1\\
 ...\\
 x_N&y_N&1&0&0&0&-u_Nx_N&-u_Ny_N&-u_Nz_N\\
 0&0&0&x_N&y_N&1&-v_Nx_N&-v_Ny_N&-v_Nz_N\\
 \end{pmatrix}
-$$
+$
+
 크기가 $9\times9$인 $L^\intercal L$ 행렬의 Eigen Values와 Eigen Vectors를 구했을 때, 가장 작은 Eigen Value에 대응되는 Eigen Vector가 호모그라피 행렬 $H$의 근사치입니다. 이 벡터는 길이가 9인데, 이를 $3\times3$ 크기의 행렬로 바꾸면 호모그라피 행렬이 됩니다.(1~3/4~6/7~9 번째 원소가 1/2/3 번째 행이 됩니다.)
 
 최적의 값이라기보다는 적절한 근사치라고 할 수 있으므로, 이를 초기값으로 삼아 최적화하는 과정이 필요합니다. 변수는 $H$로 설정하고, 주어진 $H$에 대해 $\lambda\mathbf{\hat m}=H\mathbf M$을 구합니다. 그러면 목적함수를 다음과 같이 설정할 수 있습니다.
-$$
-F(H, \mathbf M, \mathbf m)=|\mathbf m-\mathbf{\hat m}/\lambda|
-$$
+$F(H, \mathbf M, \mathbf m)=|\mathbf m-\mathbf{\hat m}/\lambda|$
 단일 점이 아니라 여러개의 점이므로 $\lambda$는 스칼라가 아닌 벡터 혹은 행렬입니다. 개별 점마다 다른 값을 가질 수 있습니다.
 
 
@@ -129,44 +125,42 @@ $$
 이제 적절한 $H^*$값을 얻었으면, 이로부터 내부 파라미터 $K$를 도출해야 합니다. 계산 과정이 복잡하고, 그 증명이나 이유를 서술하기엔 본문의 범위를 벗어나므로 대략적인 과정만 나열합니다. 따라서 다음의 계산 과정은 읽지 않아도 됩니다. 코드 구현은 Implementation에 있으며, 구체적인 과정과 수식 도출의 이유가 궁금하신 분은 [2]를 참조하십시오.
 
 행렬 $B$를 $B=K^\intercal K^{-1}$로 정의합니다. 그 $i$ 번째 행의 $j$번째 원소를 $B_{ij}$라 하고, 다음과 같이 벡터 $\mathbf b$를 정의합니다.
-$$
-\mathbf b=\begin{bmatrix}B_{11}&B_{12}&B_{22}&B_{13}&B_{23}&B_{33}\end{bmatrix}^\intercal
-$$
+
+$\mathbf b=\begin{bmatrix}B_{11}&B_{12}&B_{22}&B_{13}&B_{23}&B_{33}\end{bmatrix}^\intercal$
+
 호모그라피 행렬 $H$의 $i$번째 열벡터를 $\mathbf h_i=\begin{bmatrix}h_{i1}&h_{i2}&h_{i3}\end{bmatrix}^\intercal$로 둡니다. 그러면 다음의 식이 성립합니다.
-$$
-\mathbf h_i^\intercal B\mathbf h_j=\mathbf v_{ij}^\intercal\mathbf b\\
-\text{with }\mathbf v_{ij}=\begin{bmatrix}h_{i1}h_{j1},&h_{i1}h_{j2}+h_{i2}h_{j1},&h_{i2}h_{j2},&h_{i3}h_{j1}+h_{i1}h_{j3},&h_{i3}h_{j2}+h_{i2}h_{j3},&h_{i3}h_{j3}\end{bmatrix}^\intercal
-$$
+
+$\mathbf h_i^\intercal B\mathbf h_j=\mathbf v_{ij}^\intercal\mathbf b\\
+\text{with }\mathbf v_{ij}=\begin{bmatrix}h_{i1}h_{j1},&h_{i1}h_{j2}+h_{i2}h_{j1},&h_{i2}h_{j2},&h_{i3}h_{j1}+h_{i1}h_{j3},&h_{i3}h_{j2}+h_{i2}h_{j3},&h_{i3}h_{j3}\end{bmatrix}^\intercal$
+
 $\mathbf h_1^\intercal K^{-\intercal}K^{-1}\mathbf h_2=0$이고 $\mathbf h_1^\intercal K^{-\intercal}K^{-1}\mathbf h_1=\mathbf h_2^\intercal K^{-\intercal}K^{-1}\mathbf h_2$이므로, 다음이 성립합니다.
-$$
-\begin{bmatrix}\mathbf v_{12}^\intercal\\(\mathbf v_{11}-\mathbf v_{22})^\intercal\end{bmatrix}\mathbf b=0
-$$
+
+$\begin{bmatrix}\mathbf v_{12}^\intercal\\(\mathbf v_{11}-\mathbf v_{22})^\intercal\end{bmatrix}\mathbf b=0$
+
 $n$개의 이미지로부터 각각의 호모그라피 행렬이 계산되므로, 위 식의 왼쪽 첫 항 행렬을 $n$번 쌓아 $\mathbf V$라고 표기하면 $\mathbf V\mathbf b=0$입니다.
 
 $L$의 경우와 마찬가지로 $\mathbf V^\intercal\mathbf V$에서 가장 작은 Eigen Value에 대응하는 Eigen Vector가 $\mathbf b$가 됩니다.
 
 $\mathbf b$를 구했을 때 $K$는 다음과 같이 구합니다.
-$$
-c_y=(B_{12}B_{13}-B_{11}B_{23})/(B_{11}B_{22}-B_{12}^2)\\
+
+$c_y=(B_{12}B_{13}-B_{11}B_{23})/(B_{11}B_{22}-B_{12}^2)\\
 \lambda=B_{33}-[B_{13}^2+c_y(B_{12}B_{13}-B_{11}B_{23})]/B_{11}\\
 f_x=\sqrt{\lambda/B_{11}}\\
 f_y=\sqrt{\lambda B_{11}/(B_{11}B_{22}-B_{12}^2)}\\
 \gamma=-B_{12}f_x^2f_y/\lambda\\
 c_x=\gamma c_x/f_y-B_{13}f_x^2/\lambda\\
 \\
-K=\begin{bmatrix}f_x&0&c_x\\0&f_y&c_y\\0&0&1\end{bmatrix}
-$$
+K=\begin{bmatrix}f_x&0&c_x\\0&f_y&c_y\\0&0&1\end{bmatrix}$
 
 ##### Calculate Extrinsic Parameters
 
 호모그라피 행렬 $H$와 카메라 내부 파라미터 $K$가 있을 때 다음과 같이 외부 파라미터 $R=\begin{bmatrix}\mathbf r_1&\mathbf r_2&\mathbf r_3\end{bmatrix}, T=\mathbf t$를 구할 수 있습니다.
-$$
-\mathbf r_1=\lambda K^{-1}\mathbf h_1\\
+
+$\mathbf r_1=\lambda K^{-1}\mathbf h_1\\
 \mathbf r_2=\lambda K^{-1}\mathbf h_2\\
 \mathbf r_3=\mathbf r_1\times\mathbf r_2\\
 \mathbf t=\lambda K^{-1}\mathbf h_3\\
-\text{with } \lambda=1/||K^{-1}\mathbf h_1||=1/||K^{-1}\mathbf h_2||
-$$
+\text{with } \lambda=1/||K^{-1}\mathbf h_1||=1/||K^{-1}\mathbf h_2||$
 
 ##### Optimize
 
