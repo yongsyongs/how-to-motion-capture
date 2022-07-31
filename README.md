@@ -20,8 +20,8 @@ E-mail: ysn3830@gmail.com
 
 ## Contents
 
-1. [재귀 반사 패시브 마커 기반 모션캡쳐(Retro Reflective Passive Marker based MotionCapture)](https://htmlpreview.github.io/?https://github.com/yongsyongs/how-to-motion-capture/blob/main/html/retro-reflective-passive-marker-based-motion-capture.html)
-2. [캘리브레이션(Calibration)](https://htmlpreview.github.io/?https://github.com/yongsyongs/how-to-motion-capture/blob/main/html/calibration.html)
+1. [재귀 반사 패시브 마커 기반 모션캡쳐(Retro Reflective Passive Marker based MotionCapture)](./docs/retro-reflective-passive-marker-based-motion-capture.md)
+2. [캘리브레이션(Calibration)](./docs/calibration.md)
 3. 리컨스트럭션(Reconstruction)
 
 
