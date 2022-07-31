@@ -127,7 +127,8 @@ $$ \mathbf b=\begin{bmatrix}B_{11}&B_{12}&B_{22}&B_{13}&B_{23}&B_{33}\end{bmatri
 호모그라피 행렬 $H$의 $i$번째 열벡터를 $\mathbf h_i=\begin{bmatrix}h_{i1}&h_{i2}&h_{i3}\end{bmatrix}^\intercal$로 둡니다. 그러면 다음의 식이 성립합니다.
 
 $$ \mathbf h_i^\intercal B\mathbf h_j=\mathbf v_{ij}^\intercal\mathbf b $$
-$$ \text{with }\mathbf v_{ij}=\begin{bmatrix} h_{i1}h_{j1}, & h_{i1}h_{j2}+h_{i2}h_{j1}, & h_{i2}h_{j2}, & h_{i3}h_{j1}+h_{i1}h_{j3}, & h_{i3}h_{j2}+h_{i2}h_{j3}, & h_{i3}h_{j3}\end{bmatrix}^\intercal $$
+
+$$ \text{with }\mathbf v_{ij}=\begin{bmatrix} h_{i1}h_{j1} & h_{i1}h_{j2}+h_{i2}h_{j1} & h_{i2}h_{j2} & h_{i3}h_{j1}+h_{i1}h_{j3} & h_{i3}h_{j2}+h_{i2}h_{j3} & h_{i3}h_{j3} \end{bmatrix}^\intercal $$
 
 $\mathbf h_1^\intercal K^{-\intercal}K^{-1}\mathbf h_2=0$이고 $\mathbf h_1^\intercal K^{-\intercal}K^{-1}\mathbf h_1=\mathbf h_2^\intercal K^{-\intercal}K^{-1}\mathbf h_2$이므로, 다음이 성립합니다.
 
@@ -142,12 +143,16 @@ $L$의 경우와 마찬가지로 $\mathbf V^\intercal\mathbf V$에서 가장 작
 $\mathbf b$를 구했을 때 $K$는 다음과 같이 구합니다.
 
 $$ c_y=(B_{12}B_{13}-B_{11}B_{23})/(B_{11}B_{22}-B_{12}^2) $$
-$$ \lambda=B_{33}-[B_{13}^2+c_y(B_{12}B_{13}-B_{11}B_{23})]/B_{11} $$
-$$ f_x=\sqrt{\lambda/B_{11}} $$
-$$ f_y=\sqrt{\lambda B_{11}/(B_{11}B_{22}-B_{12}^2)} $$
-$$ \gamma=-B_{12}f_x^2f_y/\lambda $$
-$$ c_x=\gamma c_x/f_y-B_{13}f_x^2/\lambda $$
 
+$$ \lambda=B_{33}-[B_{13}^2+c_y(B_{12}B_{13}-B_{11}B_{23})]/B_{11} $$
+
+$$ f_x=\sqrt{\lambda/B_{11}} $$
+
+$$ f_y=\sqrt{\lambda B_{11}/(B_{11}B_{22}-B_{12}^2)} $$
+
+$$ \gamma=-B_{12}f_x^2f_y/\lambda $$
+
+$$ c_x=\gamma c_x/f_y-B_{13}f_x^2/\lambda $$
 
 $$ K=\begin{bmatrix}f_x & 0 & c_x \\\ 0 & f_y & c_y \\\ 0 & 0 & 1\end{bmatrix} $$
 
@@ -156,9 +161,13 @@ $$ K=\begin{bmatrix}f_x & 0 & c_x \\\ 0 & f_y & c_y \\\ 0 & 0 & 1\end{bmatrix} $
 호모그라피 행렬 $H$와 카메라 내부 파라미터 $K$가 있을 때 다음과 같이 외부 파라미터 $R=\begin{bmatrix}\mathbf r_1&\mathbf r_2&\mathbf r_3\end{bmatrix}, T=\mathbf t$를 구할 수 있습니다.
 
 $$ \mathbf r_1=\lambda K^{-1}\mathbf h_1 $$
+
 $$ \mathbf r_2=\lambda K^{-1}\mathbf h_2 $$
+
 $$ \mathbf r_3=\mathbf r_1\times\mathbf r_2 $$
+
 $$ \mathbf t=\lambda K^{-1}\mathbf h_3 $$
+
 $$ \text{with } \lambda=1/||K^{-1}\mathbf h_1||=1/||K^{-1}\mathbf h_2|| $$
 
 ##### Optimize
