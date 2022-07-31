@@ -13,7 +13,6 @@ Optimization은 주어진 조건과 목적함수가 있을 때, 목적함수를 
 
 - (Camera Geometry) 동차 좌표계, Epipolar Geometry
 - (Optimization) 최소제곱 최적화, RANSAC
-
 OpenCV라는 훌륭한 라이브러리가 있기 때문에 최적화에 대한 이해는 부족해도 모션캡쳐를 구현하는 데에 큰 문제가 없습니다. 다만, 카메라 좌표계와 동차 좌표계 등 Camera Geometry에 대한 이해는 __필수__적이니 반드시 이해하시기 바랍니다.
 
 필자는 [다크프로그래머 블로그](https://darkpgmr.tistory.com/32)에서 관련 내용을 처음으로 공부했습니다. 해당 블로그가 잘 설명되어 있어 입문하기에 좋았습니다.
@@ -26,6 +25,8 @@ Intrinsic Calibration은 내부 파라미터(Intrinsic Parameter)를 구합니�
 핀홀 카메라 모델에서 Intrinsic Calibration은 다음과 같은 Intrinsic Parameter Matrix $K$를 구합니다. 
 
 $$ K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix} $$
+$$ K = \begin{bmatrix} f_x & 0 & c_x \\\ 0 & f_y & c_y \\\ 0 & 0 & 1 \end{bmatrix} $$
+$$ K = \begin{bmatrix} f_x & 0 & c_x \\\\ 0 & f_y & c_y \\\\ 0 & 0 & 1 \end{bmatrix} $$
 
 (왜곡 계수에 대해서는 다루지 않습니다.)
 
