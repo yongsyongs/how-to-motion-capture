@@ -1,6 +1,7 @@
+.vscode
 .DS_Store
 .python-version
 *.pyc
 *.npy
 *.avi
-implementation/data/results
+*__pycache__
