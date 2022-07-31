@@ -22,9 +22,11 @@ OpenCV라는 훌륭한 라이브러리가 있기 때문에 최적화에 대한 �
 
 Intrinsic Calibration은 내부 파라미터(Intrinsic Parameter)를 구합니다. 카메라의 내부 파라미터는 렌즈에 의해 맺히는 상과 실제 이미지 사이의 관계를 나타냅니다.
 
-핀홀 카메라 모델에서 Intrinsic Calibration은 다음과 같은 Intrinsic Parameter Matrix $K$를 구합니다. \
+핀홀 카메라 모델에서 Intrinsic Calibration은 다음과 같은 Intrinsic Parameter Matrix $K$를 구합니다.
 
-$$ K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix} $$
+$$
+ K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix} 
+$$
 
 
 (왜곡 계수에 대해서는 다루지 않습니다.)
