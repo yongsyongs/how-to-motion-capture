@@ -100,9 +100,8 @@ $\mathbf M$의 세 번째 행이 모두 1인 이유는 Co-Planar한 점들이라
 ##### Calculate Homography Matrix
 
 위 점들로부터 다음과 같은 행렬 $L$을 구성합니다. $L$의 크기는 $2N\times9$입니다.
-$$
-L=\begin{pmatrix} x_1 & y_1 & 1 & 0 & 0 & 0 & -u_1x_1 & -u_1y_1 & -u_1z_1 \\\ 0 & 0 & 0 & x_1 & y_1 & 1 & -v_1x_1 & -v_1y_1 & -v_1z_1 \\\ ... \\\ x_N & y_N & 1 & 0 & 0 & 0 & -u_Nx_N & -u_Ny_N & -u_Nz_N \\\ 0 & 0 & 0 & x_N & y_N & 1 & -v_Nx_N & -v_Ny_N & -v_Nz_N \end{pmatrix}
-$$
+
+$$ L=\begin{pmatrix} x_1 & y_1 & 1 & 0 & 0 & 0 & -u_1x_1 & -u_1y_1 & -u_1z_1 \\\ 0 & 0 & 0 & x_1 & y_1 & 1 & -v_1x_1 & -v_1y_1 & -v_1z_1 \\\ ... & ... & ... & ... & ... & ... & ... & ... & ... \\\ x_N & y_N & 1 & 0 & 0 & 0 & -u_Nx_N & -u_Ny_N & -u_Nz_N \\\ 0 & 0 & 0 & x_N & y_N & 1 & -v_Nx_N & -v_Ny_N & -v_Nz_N \end{pmatrix} $$
 
 크기가 $9\times9$인 $L^\intercal L$ 행렬의 Eigen Values와 Eigen Vectors를 구했을 때, 가장 작은 Eigen Value에 대응되는 Eigen Vector가 호모그라피 행렬 $H$의 근사치입니다. 이 벡터는 길이가 9인데, 이를 $3\times3$ 크기의 행렬로 바꾸면 호모그라피 행렬이 됩니다.(1 - 3/4 - 6/7 - 9 번째 원소가 1/2/3 번째 행이 됩니다.)
 
