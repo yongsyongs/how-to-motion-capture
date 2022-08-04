@@ -26,7 +26,6 @@ E-mail: ysn3830@gmail.com
 ※ 현재 테스트 데이터셋의 퀄리티가 좋지 않습니다. 그러나 작성자가 군 복무 중이므로 추가 촬영이 어려워 Reconstruction 과정을 더 진행하기 어려운 상황입니다.
 
 #### TODO List
- - Youtube Html
  - ./docs 문서에 이미지 추가
  - Circular 환경에서 추가 촬영
  - 3D 복원 및 Correspondence 계산 코드 추가

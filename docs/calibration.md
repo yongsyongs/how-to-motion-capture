@@ -191,15 +191,12 @@ TODO: 사진
 
 따라서 방향이 구분되지 않는 chess board보다는, 방향이 구분되면서 planar한 물체를 calibration의 피사체로 활용해야 합니다.
 
-아래 영상은 그 예시 중 하나입니다.
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/6ysHjP5t5_E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+이 [영상](https://www.youtube.com/embed/6ysHjP5t5_E)은 그 예시 중 하나입니다.
 
 위 피사체의 경우 마커의 위치를 적절히 조절하여 어느 방향에서 촬영하든 각각의 마커를 **식별**할 수 있습니다.(마커를 가리키는 사각형 테두리의 색이 고유합니다.)
 
-앞으로의 캘리브레이션의 예제는 아래와 같은 데이터를 활용합니다. 아래의 영상은 작성자가 자체적으로 제작한 planar board이며, 환경은 (640, 360) 해상도의 카메라 8대를 원형으로 배치하였습니다.
+앞으로의 캘리브레이션의 예제는 아래와 같은 데이터를 활용합니다. 이 [영상](https://www.youtube.com/embed/Xmrd3r8AMPg)은 작성자가 자체적으로 제작한 planar board이며, 환경은 (640, 360) 해상도의 카메라 8대를 원형으로 배치하였습니다.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Xmrd3r8AMPg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 적절히 크게 잘 배치된 캘리브레이션용 피사체를 한 번 촬영하여도 되지만, 최적화 과정에서 더 정확한 근사해를 구하고자 영상으로 찍었습니다. 어떤 카메라에서 보드를 잘 인식했다면 해당 데이터로 Intrinisic Calibration을 진행하며, 두 카메라에 동시에 촬영되었다면 이로부터 두 카메라의 상대적 관계를 구할 수 있습니다. $i$번 카메라의 좌표계로부터 $j$번 카메라의 좌표계로 변환하는 파라미터들을 $R_{ij}, T_{ij}$라 하면, 4번 카메라의 외부 파라미터는 $R_4=R_{34}R_{23}R_{12}R_1$, $T_4=R_{23}T_{34}+R_{12}T_{23}+R_1T_{12}+T_1$이 됩니다. 
 
