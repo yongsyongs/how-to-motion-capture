@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
+# 캘리브레이션 보드의 점 좌표들. 점들이 Co-plannar한 좌표여야 한다.
+# 보드를 제작하는 방식에 맞추어 수정해야 한다.
 POSITIONS = np.array(
     [
         [0, 0],
