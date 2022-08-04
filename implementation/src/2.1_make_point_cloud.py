@@ -76,49 +76,7 @@ def match_points_spatially(points_2d, P_mats, threshold):
         minimum_args[0].add(idx[0])
         minimum_args[1].add(idx[1])
 
-    # valid_points_3d = np.stack(
-    #     [points_3d[idx[0] * n_points[1] + idx[1]] for idx in unique_valid_indices]
-    # )
-    # unique_valid_indices = np.array(unique_valid_indices)
-
     return unique_valid_indices
-
-
-# region TODO: calcualte temporal correspondence
-"""
-def match_points_temporally(points_2d, points_2d_next, threshold):
-    N1, N2 = points_2d.shape[0], points_2d_next.shape[0]
-    error = points_2d[:, np.newaxis, ...] - points_2d_next[np.newaxis, ...]
-    error = np.linalg.norm(error, axis=-1)
-    is_valid = error < threshold
-    if not is_valid.any():
-        return []
-
-    error[np.logical_not(is_valid)] = 1e10
-    valid_indices = [
-        (a, b)
-        for x in np.argsort(error, axis=None)
-        if is_valid[
-            (a := x // N2),
-            (b := x - x // N2 * N2),
-        ]
-    ]
-
-    minimum_args = [set(), set()]
-    unique_valid_indices = []
-
-    for idx in valid_indices:
-        if idx[0] in minimum_args[0] or idx[1] in minimum_args[1]:
-            continue
-
-        unique_valid_indices.append(idx)
-        minimum_args[0].add(idx[0])
-        minimum_args[1].add(idx[1])
-
-    # unique_valid_indices = np.array(unique_valid_indices)
-
-    return unique_valid_indices
-"""
 
 
 def main(

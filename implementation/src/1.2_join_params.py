@@ -20,9 +20,6 @@ def load_parametrs(intr_params_path, extr_params_path, extr_offset):
     R_mats = [extr_offset["R"]]
     T_vecs = [extr_offset["T"]]
 
-    # R[k] = R_rel@R[k-1]
-    # T[k] = T_rel + R[k]@inv(R[k-1])@T[k-1]
-
     for rel_RT in rel_RT_mats:
         rel_R = rel_RT[:, :3]
         rel_T = rel_RT[:, 3:]
